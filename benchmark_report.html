@@ -1,0 +1,99 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>LRU Cache Comparison</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        .container { width: 90%; margin: auto; }
+        h1 { text-align: center; }
+        .note { text-align: center; color: #666; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>High-Performance Cache Comparison</h1>
+        <p class="note">Workload: 90% GET, 10% PUT | 100k Items | 200k Keys</p>
+        <canvas id="perfChart"></canvas>
+    </div>
+
+    <script>
+        const ctx = document.getElementById('perfChart').getContext('2d');
+        const perfChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [1, 4, 8, 16, 32],
+                datasets: [
+                    
+                {
+                    label: 'MyLRU (Low Folds)',
+                    data: [118044.88, 454731.13, 936119.65, 1248861.45, 1261509.95],
+                    borderColor: 'rgb(255, 99, 132)',
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    tension: 0.1,
+                    fill: false,
+                    pointRadius: 5
+                },
+
+                {
+                    label: 'MyLRU (High Folds)',
+                    data: [102092909.95, 334222616.66, 652302022.11, 853934285.61, 836593903.61],
+                    borderColor: 'rgb(54, 162, 235)',
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    tension: 0.1,
+                    fill: false,
+                    pointRadius: 5
+                },
+
+                {
+                    label: 'DashMap*',
+                    data: [71816178.38, 153614956.84, 257167626.39, 321081750.45, 318415450.16],
+                    borderColor: 'rgb(255, 206, 86)',
+                    backgroundColor: 'rgba(255, 206, 86, 0.2)',
+                    tension: 0.1,
+                    fill: false,
+                    pointRadius: 5
+                },
+
+                {
+                    label: 'Moka',
+                    data: [7871181.23, 13913650.63, 15777439.2, 14468035.04, 5698136.22],
+                    borderColor: 'rgb(75, 192, 192)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    tension: 0.1,
+                    fill: false,
+                    pointRadius: 5
+                },
+
+                {
+                    label: 'MutexLRU',
+                    data: [144877010.58, 60920961.3, 32023885.57, 14267556.91, 11801366.71],
+                    borderColor: 'rgb(153, 102, 255)',
+                    backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                    tension: 0.1,
+                    fill: false,
+                    pointRadius: 5
+                }
+                ]
+            },
+            options: {
+                responsive: true,
+                interaction: {
+                    mode: 'index',
+                    intersect: false,
+                },
+                scales: {
+                    x: {
+                        title: { display: true, text: 'Number of Threads' }
+                    },
+                    y: {
+                        title: { display: true, text: 'Throughput (Ops/sec)' },
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
