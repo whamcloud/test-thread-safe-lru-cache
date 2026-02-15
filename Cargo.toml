@@ -1,0 +1,14 @@
+[package]
+name = "lru-cache"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+
+[dev-dependencies]
+rand = "0.10.0"
+criterion = "0.8.2"
+
+[[bench]]
+name = "lru-benchmarking"
+harness = false
