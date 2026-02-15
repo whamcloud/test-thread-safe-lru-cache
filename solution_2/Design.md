@@ -134,6 +134,12 @@ Format check:
 cargo fmt --all -- --check
 ```
 
+Docgen:
+
+```bash
+cargo doc --open
+```
+
 ---
 
 ## Implementation Details

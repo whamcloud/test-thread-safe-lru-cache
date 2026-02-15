@@ -1,15 +1,69 @@
-//! Sharded LRU cache library for solution_2.
+//! # solution_2 — Sharded, Thread-Safe LRU Cache
 //!
-//! This crate provides a thread-safe, sharded LRU cache that reduces lock
-//! contention compared to a single global lock approach by partitioning keys
-//! across independent shards. Each shard maintains its own MRU/LRU list and
-//! HashMap and is protected by a single shard-level `Mutex`.
+//! This crate provides a **thread-safe, sharded LRU (Least Recently Used) cache**
+//! designed to reduce lock contention under concurrent workloads.
 //!
-//! Key properties:
-//! - O(1) average get/put via HashMap
-//! - O(1) move-to-front and tail eviction via key-linked adjacency
-//! - Fixed, bounded capacity distributed across shards
-//! - Safe Rust only, with lock-poisoning recovery
+//! Instead of protecting the entire cache behind a single global lock,
+//! the key space is partitioned across independent shards. Each shard:
+//!
+//! - Maintains its own `HashMap<K, Entry>`
+//! - Tracks MRU/LRU ordering using key-linked adjacency
+//! - Is protected by a single `Mutex`
+//!
+//! This significantly reduces contention compared to a monolithic design.
+//!
+//! ---
+//!
+//! ## Design Goals
+//!
+//! - **O(1)** average-time `get` and `put`
+//! - **O(1)** move-to-front operations
+//! - **O(1)** tail eviction
+//! - Fixed, bounded total capacity
+//! - Safe Rust only (no `unsafe`)
+//! - Lock-poisoning recovery (with `Mutex::try_lock`)
+//!
+//! Lock poisoning happens when a thread panics while holding a lock.
+//! In this case, the lock is poisoned and subsequent acquisitions will fail.
+//! The cache will recover by dropping the poisoned lock and allowing other threads to proceed.
+//!
+//!
+//! ---
+//!
+//! ## Concurrency Model
+//!
+//! Each shard is protected by an independent `Mutex`.
+//! Operations on different shards proceed fully in parallel.
+//!
+//! The shard index is determined via the default Rust hasher.
+//!
+//! ---
+//!
+//! ## Example
+//!
+//! ```rust
+//! use solution_2::ShardedLruCache;
+//!
+//! let cache = ShardedLruCache::new(8, 2);
+//!
+//! cache.put(1, "a");
+//! cache.put(2, "b");
+//!
+//! assert_eq!(cache.get(&1), Some("a"));
+//! assert_eq!(cache.len(), 2);
+//! ```
+//!
+//! ---
+//!
+//! ## When To Use
+//!
+//! This implementation is well-suited for:
+//!
+//! - Read-heavy concurrent workloads
+//! - Moderate write contention
+//! - Bounded memory scenarios
+//!
+//! It is not intended as a fully lock-free or wait-free structure.
 
 use std::collections::HashMap;
 use std::hash::{Hash, Hasher};
